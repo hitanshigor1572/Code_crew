@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppNavbar } from "@/components/layout/AppNavbar";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -15,6 +16,20 @@ export default function MainAppLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = React.useState(false);
   const [currencyModalOpen, setCurrencyModalOpen] = React.useState(false);
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!localStorage.getItem("globetrotter_token")) {
+      router.replace("/login");
+      return;
+    }
+    setAuthChecked(true);
+  }, [router]);
+
+  if (!authChecked) {
+    return <div className="min-h-screen flex items-center justify-center text-xs text-zinc-400">Checking your session...</div>;
+  }
 
   return (
     <div className="min-h-screen flex bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">

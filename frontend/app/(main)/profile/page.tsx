@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/dialog";
 import { BadgeList } from "@/components/common/BadgeList";
 import { DestinationCard } from "@/components/trip/DestinationCard";
-import { getCurrentUser, updateUserProfile, toggleSaveDestination } from "@/lib/services/user.service";
+import { getCurrentUser, updateUserProfile, toggleSaveDestination, deleteCurrentUser } from "@/lib/services/user.service";
 import { getCities } from "@/lib/services/city.service";
 import { UserProfile } from "@/types/user";
 import { City } from "@/types/city";
@@ -354,9 +354,14 @@ export default function ProfilePage() {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                setDeleteModalOpen(false);
-                toast.error("Account deletion simulated in demo mode");
+              onClick={async () => {
+                try {
+                  await deleteCurrentUser();
+                  toast.success("Your account has been deleted");
+                  window.location.href = "/";
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : "Unable to delete account");
+                }
               }}
               className="rounded-xl"
             >

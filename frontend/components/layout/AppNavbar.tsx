@@ -38,7 +38,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_USER } from "@/data/mock";
+import { getCurrentUser } from "@/lib/services/user.service";
+import { UserProfile } from "@/types/user";
+import { api } from "@/lib/api";
 
 interface AppNavbarProps {
   onOpenAIAssistant?: () => void;
@@ -54,6 +56,13 @@ export function AppNavbar({
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [user, setUser] = React.useState<UserProfile | null>(null);
+  const [notifications, setNotifications] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    getCurrentUser().then(setUser).catch(() => undefined);
+    api<any[]>('/notifications').then(setNotifications).catch(() => undefined);
+  }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,32 +71,7 @@ export function AppNavbar({
     }
   };
 
-  const notifications = [
-    {
-      id: "n1",
-      title: "Paris Trip in 3 Weeks",
-      desc: "Don't forget to finalize your Day 3 Versailles booking.",
-      time: "10m ago",
-      read: false,
-      icon: Plane,
-    },
-    {
-      id: "n2",
-      title: "Flight Price Drop Alert",
-      desc: "Tokyo flights dropped by 18% for October dates.",
-      time: "2h ago",
-      read: false,
-      icon: DollarSign,
-    },
-    {
-      id: "n3",
-      title: "Elena Rostova accepted invite",
-      desc: "Now collaborating on Paris Explorer & Riviera Escape.",
-      time: "1d ago",
-      read: true,
-      icon: User,
-    },
-  ];
+  const unreadCount = notifications.filter((notification) => !notification.read).length;
 
   return (
     <header className="sticky top-0 z-20 flex h-20 w-full items-center justify-between border-b border-zinc-200/80 bg-white/80 px-4 md:px-8 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/80">
@@ -138,7 +122,7 @@ export function AppNavbar({
             className="hidden sm:inline-flex rounded-2xl text-xs font-semibold gap-1.5 h-9"
           >
             <DollarSign className="h-3.5 w-3.5 text-accent" />
-            <span>USD ($)</span>
+            <span>{user?.currency || "USD"}</span>
           </Button>
         )}
 
@@ -172,7 +156,7 @@ export function AppNavbar({
               className="relative h-10 w-10 rounded-2xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900"
             >
               <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary ring-2 ring-white dark:ring-zinc-950" />
+              {unreadCount > 0 && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary ring-2 ring-white dark:ring-zinc-950" />}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80 p-0 rounded-3xl overflow-hidden shadow-2xl">
@@ -180,16 +164,16 @@ export function AppNavbar({
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm">Notifications</span>
                 <Badge variant="default" className="text-[10px] h-5 px-1.5">
-                  2 New
+                  {unreadCount} New
                 </Badge>
               </div>
-              <button type="button" className="text-xs text-primary font-medium hover:underline">
+              <button type="button" onClick={() => { api('/notifications/read', { method: 'PATCH' }).then(() => setNotifications((items) => items.map((item) => ({ ...item, read: true })))); }} className="text-xs text-primary font-medium hover:underline">
                 Mark all read
               </button>
             </div>
             <div className="divide-y divide-zinc-100 dark:divide-zinc-800/60 max-h-80 overflow-y-auto">
               {notifications.map((n) => {
-                const Icon = n.icon;
+                const Icon = n.type === "expense" ? DollarSign : n.type === "trip" ? Plane : User;
                 return (
                   <div
                     key={n.id}
@@ -205,10 +189,10 @@ export function AppNavbar({
                         <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
                           {n.title}
                         </p>
-                        <span className="text-[10px] text-zinc-400">{n.time}</span>
+                        <span className="text-[10px] text-zinc-400">{new Date(n.createdAt).toLocaleDateString()}</span>
                       </div>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-0.5">
-                        {n.desc}
+                          {n.desc}
                       </p>
                     </div>
                   </div>
@@ -257,15 +241,15 @@ export function AppNavbar({
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/40">
               <Avatar className="h-10 w-10 ring-2 ring-primary/20 hover:ring-primary/50 transition-all">
-                <AvatarImage src={MOCK_USER.avatar} alt={MOCK_USER.name} />
-                <AvatarFallback>{MOCK_USER.name.substring(0, 2)}</AvatarFallback>
+                <AvatarImage src={user?.avatar || undefined} alt={user?.name || "User"} />
+                <AvatarFallback>{(user?.name || "User").substring(0, 2)}</AvatarFallback>
               </Avatar>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl">
             <div className="px-2 py-1.5">
-              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{MOCK_USER.name}</p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{MOCK_USER.email}</p>
+              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{user?.name || "Loading profile..."}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{user?.email || ""}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -285,7 +269,7 @@ export function AppNavbar({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/login" className="cursor-pointer text-danger focus:text-danger">
+              <Link href="/login" onClick={() => localStorage.removeItem("globetrotter_token")} className="cursor-pointer text-danger focus:text-danger">
                 <LogOut className="h-4 w-4 mr-2" /> Sign Out
               </Link>
             </DropdownMenuItem>

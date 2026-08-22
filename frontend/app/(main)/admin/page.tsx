@@ -22,7 +22,6 @@ import { TripTrendsAreaChart } from "@/components/charts/TripTrendsAreaChart";
 import { BudgetCard } from "@/components/trip/BudgetCard";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { api } from "@/lib/api";
-import { getTrips } from "@/lib/services/trip.service";
 
 export default function AdminDashboardPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -30,7 +29,7 @@ export default function AdminDashboardPage() {
   const [trips, setTrips] = React.useState<any[]>([]);
 
   React.useEffect(() => {
-    Promise.all([api<any>("/admin/metrics"), getTrips()]).then(([loadedMetrics, loadedTrips]) => {
+    Promise.all([api<any>("/admin/metrics"), api<any[]>("/admin/trips")]).then(([loadedMetrics, loadedTrips]) => {
       setMetrics(loadedMetrics);
       setTrips(loadedTrips);
     }).catch(() => undefined);
@@ -202,7 +201,7 @@ export default function AdminDashboardPage() {
                     {t.title}
                   </td>
                   <td className="py-3.5 text-zinc-600 dark:text-zinc-300">
-                    {t.collaborators[0]?.name || "Alexandre"}
+                    {t.collaborators[0]?.name || t.ownerName || "Unknown traveler"}
                   </td>
                   <td className="py-3.5 font-mono">{t.cities.length} stops</td>
                   <td className="py-3.5 font-bold text-zinc-900 dark:text-zinc-100">

@@ -25,7 +25,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MOCK_USER } from "@/data/mock";
+import { getCurrentUser } from "@/lib/services/user.service";
+import { UserProfile } from "@/types/user";
 
 interface AppSidebarProps {
   isCollapsed?: boolean;
@@ -97,11 +98,16 @@ export function AppSidebar({
   onOpenAIAssistant,
 }: AppSidebarProps) {
   const pathname = usePathname();
+  const [user, setUser] = React.useState<UserProfile | null>(null);
+
+  React.useEffect(() => {
+    getCurrentUser().then(setUser).catch(() => undefined);
+  }, []);
 
   return (
     <aside
       className={cn(
-        "relative hidden md:flex flex-col border-r border-zinc-200/80 bg-white/80 dark:border-zinc-800/80 dark:bg-zinc-950/80 backdrop-blur-xl transition-all duration-300 z-30 h-screen sticky top-0",
+        "hidden md:flex flex-col border-r border-zinc-200/80 bg-white/80 dark:border-zinc-800/80 dark:bg-zinc-950/80 backdrop-blur-xl transition-all duration-300 z-30 h-screen sticky top-0",
         isCollapsed ? "w-20" : "w-64"
       )}
     >
@@ -138,7 +144,7 @@ export function AppSidebar({
 
       {/* Navigation Links */}
       <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5 no-scrollbar">
-        {navItems.map((item) => {
+        {navItems.filter((item) => item.href !== "/admin" || user?.email.toLowerCase() === "jayprajapati3117@gmail.com").map((item) => {
           const isActive =
             pathname === item.href ||
             (item.href !== "/dashboard" && pathname.startsWith(item.href) && item.href !== "/trips/create" && item.href !== "/discover/activities");
@@ -246,16 +252,16 @@ export function AppSidebar({
           )}
         >
           <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-            <AvatarImage src={MOCK_USER.avatar} alt={MOCK_USER.name} />
-            <AvatarFallback>{MOCK_USER.name.substring(0, 2)}</AvatarFallback>
+            <AvatarImage src={user?.avatar || undefined} alt={user?.name || "User"} />
+            <AvatarFallback>{(user?.name || "User").substring(0, 2)}</AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
-                {MOCK_USER.name}
+                {user?.name || "Loading profile..."}
               </span>
               <span className="text-xs text-zinc-400 truncate">
-                {MOCK_USER.location}
+                {user?.location || "Update your profile"}
               </span>
             </div>
           )}

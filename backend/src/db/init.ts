@@ -50,6 +50,11 @@ await connection.query(`
     paid_by JSON NOT NULL, notes TEXT NULL, receipt_url TEXT NULL, FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
   ) ENGINE=InnoDB;
+    CREATE TABLE IF NOT EXISTS notifications (
+      id VARCHAR(36) PRIMARY KEY, user_id VARCHAR(36) NOT NULL, title VARCHAR(180) NOT NULL,
+      description TEXT NOT NULL, type VARCHAR(30) NOT NULL DEFAULT 'info', is_read BOOLEAN NOT NULL DEFAULT false,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB;
 `);
 
 const passwordHash = await bcrypt.hash('password123', 12);
@@ -71,6 +76,18 @@ const cities = [
 ];
 for (const city of cities) {
   await connection.query(`INSERT IGNORE INTO cities (id,name,country,country_code,continent,image,gallery,description,tagline,rating,review_count,avg_daily_budget,cost_index,popularity_score,climate,tags,coordinates,highlights,time_zone) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [city[0], city[1], city[2], city[3], city[4], city[5], '[]', city[6], `Explore ${city[1]}`, city[7], city[8], city[9], city[10], city[11], JSON.stringify({ temp: Number(city[12]), condition: city[13], bestSeason: city[14] }), JSON.stringify(city[15]), JSON.stringify({ lat: Number(city[17]), lng: Number(city[18]) }), JSON.stringify(city[16]), city[19]]);
+}
+
+const activities = [
+  ['activity-paris-louvre', 'city-paris', 'Paris', 'Louvre Museum Priority Tour', 'Culture', 'Explore the Louvre highlights with an expert guide and timed entry.', 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&auto=format&fit=crop&q=80', 150, '2h 30m', 75, 4.9, 1260, 'Louvre Pyramid', ['Museums', 'History'], true, 'Morning', { lat: 48.8606, lng: 2.3376 }],
+  ['activity-paris-food', 'city-paris', 'Paris', 'Montmartre Food Walk', 'Food', 'Taste fresh pastries, cheese, and regional specialties across Montmartre.', 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800&auto=format&fit=crop&q=80', 180, '3h', 45, 4.8, 840, 'Montmartre', ['Food', 'Walking'], false, 'Morning', { lat: 48.8867, lng: 2.3431 }],
+  ['activity-tokyo-shibuya', 'city-tokyo', 'Tokyo', 'Shibuya Night Food Tour', 'Nightlife', 'Discover izakaya favorites and neon-lit streets with a local host.', 'https://images.unsplash.com/photo-1540959733332-eab4debbe7f2?w=800&auto=format&fit=crop&q=80', 180, '3h', 90, 4.9, 1020, 'Shibuya Station', ['Food', 'Nightlife'], true, 'Night', { lat: 35.6595, lng: 139.7005 }],
+  ['activity-tokyo-temple', 'city-tokyo', 'Tokyo', 'Historic Asakusa Walk', 'Culture', 'Visit Senso-ji and hidden neighborhood lanes in historic Asakusa.', 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&auto=format&fit=crop&q=80', 120, '2h', 30, 4.7, 690, 'Senso-ji Temple', ['Temples', 'History'], false, 'Afternoon', { lat: 35.7148, lng: 139.7967 }],
+  ['activity-rome-colosseum', 'city-rome', 'Rome', 'Colosseum Underground Tour', 'Culture', 'See the arena floor and underground passages with priority access.', 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&auto=format&fit=crop&q=80', 150, '2h 30m', 85, 4.9, 1880, 'Colosseum', ['History', 'Architecture'], true, 'Morning', { lat: 41.8902, lng: 12.4922 }],
+  ['activity-bali-temple', 'city-bali', 'Bali', 'Ubud Rice Terrace Sunrise', 'Nature', 'Walk through emerald terraces and villages before the island warms up.', 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&auto=format&fit=crop&q=80', 240, '4h', 40, 4.8, 730, 'Tegallalang', ['Nature', 'Wellness'], false, 'Morning', { lat: -8.4312, lng: 115.2792 }],
+];
+for (const activity of activities) {
+  await connection.query(`INSERT IGNORE INTO activities (id,city_id,city_name,title,category,description,image,duration_minutes,duration_text,cost,rating,reviews_count,location_name,tags,booking_required,time_of_day,coordinates) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [activity[0], activity[1], activity[2], activity[3], activity[4], activity[5], activity[6], activity[7], activity[8], activity[9], activity[10], activity[11], activity[12], JSON.stringify(activity[13]), activity[14], activity[15], JSON.stringify(activity[16])]);
 }
 console.log(`Database ${database} is ready. Demo login: alex.morgan@globetrotter.io / password123`);
 await connection.end();
