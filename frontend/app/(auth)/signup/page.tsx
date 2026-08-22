@@ -25,7 +25,7 @@ export default function SignupPage() {
         </div>
 
         <div className="text-xs text-zinc-400 text-center sm:text-left">
-          © {new Date().getFullYear()} GlobeTrotter Inc. • Intelligent Travel Planning
+          © 2026 GlobeTrotter Inc. • Intelligent Travel Planning
         </div>
       </div>
 

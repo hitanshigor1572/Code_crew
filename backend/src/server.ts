@@ -11,8 +11,14 @@ const port = Number(process.env.PORT || 4000);
 const secret = process.env.JWT_SECRET || 'development-only-secret';
 type AuthRequest = Request & { userId?: string };
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' }));
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map((origin) => origin.trim());
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
+
+app.use((_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 
 function asyncRoute(handler: (req: AuthRequest, res: Response) => Promise<any>) {
   return (req: AuthRequest, res: Response, next: NextFunction) => handler(req, res).catch(next);
@@ -21,8 +27,24 @@ function asyncRoute(handler: (req: AuthRequest, res: Response) => Promise<any>) 
 function auth(req: AuthRequest, res: Response, next: NextFunction) {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
   if (!token) return res.status(401).json({ error: 'Authentication required' });
-  try { req.userId = (jwt.verify(token, secret) as jwt.JwtPayload).sub; next(); }
+  try {
+    const subject = (jwt.verify(token, secret) as jwt.JwtPayload).sub;
+    if (typeof subject !== 'string') return res.status(401).json({ error: 'Invalid token' });
+    req.userId = subject;
+    next();
+  }
   catch { return res.status(401).json({ error: 'Invalid or expired token' }); }
+}
+
+function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {
+  const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+  if (token) {
+    try {
+      const subject = (jwt.verify(token, secret) as jwt.JwtPayload).sub;
+      if (typeof subject === 'string') req.userId = subject;
+    } catch { /* Public routes can continue without an invalid optional token. */ }
+  }
+  next();
 }
 
 function parseJson<T>(value: unknown, fallback: T): T {
@@ -66,8 +88,8 @@ app.post('/api/ai/chat', auth, asyncRoute(async (req, res) => {
 }));
 
 app.post('/api/auth/signup', asyncRoute(async (req, res) => {
-  const { fullName, email, password } = req.body;
-  if (!fullName || !email || !password || password.length < 8) return res.status(400).json({ error: 'Name, valid email and 8-character password are required' });
+  const { fullName, email, password } = req.body || {};
+  if (typeof fullName !== 'string' || typeof email !== 'string' || typeof password !== 'string' || fullName.trim().length < 2 || !email.includes('@') || password.length < 8) return res.status(400).json({ error: 'Name, valid email and 8-character password are required' });
   const id = randomUUID();
   try {
     await pool.execute(`INSERT INTO users (id,name,email,password_hash,avatar,bio,location,joined_date,saved_destinations,badges) VALUES (?,?,?,?,?,?,?,?,?,?)`,
@@ -121,7 +143,9 @@ app.get('/api/activities', asyncRoute(async (req, res) => {
   res.json((rows as any[]).map((row) => ({ ...row, cityId: row.city_id, durationMinutes: row.duration_minutes, durationText: row.duration_text, reviewsCount: row.reviews_count, locationName: row.location_name, bookingRequired: Boolean(row.booking_required), timeOfDay: row.time_of_day, tags: parseJson(row.tags, []), coordinates: parseJson(row.coordinates, undefined) })));
 }));
 
-app.get('/api/admin/metrics', auth, asyncRoute(async (_req, res) => {
+app.get('/api/admin/metrics', auth, asyncRoute(async (req, res) => {
+  const [roleRows] = await pool.execute('SELECT role FROM users WHERE id = ?', [req.userId!] as any[]);
+  if ((roleRows as any[])[0]?.role !== 'admin') return res.status(403).json({ error: 'Administrator access required' });
   const [userRows] = await pool.query('SELECT COUNT(*) AS totalUsers FROM users');
   const [tripRows] = await pool.query('SELECT COUNT(*) AS totalTrips, COALESCE(SUM(total_budget), 0) AS plannedSpend FROM trips');
   const [cityRows] = await pool.query('SELECT COUNT(*) AS totalCities FROM cities');
@@ -134,9 +158,9 @@ app.get('/api/admin/metrics', auth, asyncRoute(async (_req, res) => {
 
 function tripResponse(row: any) { return { id: row.id, title: row.title, tagline: row.tagline, description: row.description, coverImage: row.cover_image, startDate: row.start_date, endDate: row.end_date, totalDays: row.total_days, status: row.status, travelStyle: row.travel_style, totalBudget: Number(row.total_budget), spentBudget: Number(row.spent_budget), currency: row.currency, cities: parseJson(row.cities, []), itinerary: parseJson(row.itinerary, []), collaborators: parseJson(row.collaborators, []), isPublic: Boolean(row.is_public), shareId: row.share_id, createdAt: row.created_at, updatedAt: row.updated_at, progressPercent: row.total_days ? Math.min(100, Math.round((Number(row.spent_budget) / Number(row.total_budget)) * 100)) : 0, tags: parseJson(row.tags, []) }; }
 app.get('/api/trips', auth, asyncRoute(async (req, res) => { const [rows] = await pool.execute('SELECT * FROM trips WHERE owner_id = ? AND (? = "" OR status = ?)', [req.userId!, String(req.query.status || ''), String(req.query.status || '')] as any[]); res.json((rows as any[]).map(tripResponse)); }));
-app.get('/api/trips/:id', asyncRoute(async (req, res) => { const [rows] = await pool.execute('SELECT * FROM trips WHERE id = ? OR share_id = ?', [req.params.id, req.params.id]); const trip = (rows as any[])[0]; if (!trip || (!trip.is_public && trip.owner_id !== req.userId)) return res.status(404).json({ error: 'Trip not found' }); res.json(tripResponse(trip)); }));
-app.post('/api/trips', auth, asyncRoute(async (req, res) => { const data = req.body; const id = randomUUID(); const today = new Date(); const shareId = `gt-share-${randomUUID().slice(0, 8)}`; await pool.execute(`INSERT INTO trips (id,owner_id,title,tagline,description,cover_image,start_date,end_date,total_days,status,travel_style,total_budget,spent_budget,currency,cities,itinerary,collaborators,is_public,share_id,tags,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [id, req.userId, data.title, data.tagline || '', data.description, data.coverImage, data.startDate, data.endDate, data.totalDays || 1, data.status || 'draft', data.travelStyle || 'Solo', data.totalBudget || 0, data.spentBudget || 0, data.currency || 'USD', JSON.stringify(data.cities || []), JSON.stringify(data.itinerary || []), JSON.stringify(data.collaborators || []), data.isPublic !== false, shareId, JSON.stringify(data.tags || []), today, today]); const [rows] = await pool.execute('SELECT * FROM trips WHERE id = ?', [id]); res.status(201).json(tripResponse((rows as any[])[0])); }));
-app.patch('/api/trips/:id', auth, asyncRoute(async (req, res) => { const map: Record<string,string> = { title:'title', tagline:'tagline', description:'description', coverImage:'cover_image', startDate:'start_date', endDate:'end_date', totalDays:'total_days', status:'status', travelStyle:'travel_style', totalBudget:'total_budget', spentBudget:'spent_budget', currency:'currency', cities:'cities', itinerary:'itinerary', collaborators:'collaborators', isPublic:'is_public', tags:'tags' }; const keys = Object.keys(req.body).filter((key) => map[key]); if (!keys.length) return res.status(400).json({ error:'No supported fields supplied' }); const values = keys.map((key) => ['cities','itinerary','collaborators','tags'].includes(key) ? JSON.stringify(req.body[key]) : req.body[key]); await pool.execute(`UPDATE trips SET ${keys.map((key) => `\`${map[key]}\` = ?`).join(', ')}, updated_at = ? WHERE id = ? AND owner_id = ?`, [...values, new Date(), req.params.id, req.userId]); const [rows] = await pool.execute('SELECT * FROM trips WHERE id = ?', [req.params.id]); const trip = (rows as any[])[0]; if (!trip) return res.status(404).json({ error:'Trip not found' }); res.json(tripResponse(trip)); }));
+app.get('/api/trips/:id', optionalAuth, asyncRoute(async (req, res) => { const [rows] = await pool.execute('SELECT * FROM trips WHERE id = ? OR share_id = ?', [req.params.id, req.params.id]); const trip = (rows as any[])[0]; if (!trip || (!trip.is_public && trip.owner_id !== req.userId)) return res.status(404).json({ error: 'Trip not found' }); res.json(tripResponse(trip)); }));
+app.post('/api/trips', auth, asyncRoute(async (req, res) => { const data = req.body || {}; if (typeof data.title !== 'string' || !data.title.trim() || !data.startDate || !data.endDate) return res.status(400).json({ error: 'Title, start date and end date are required' }); const id = randomUUID(); const today = new Date(); const shareId = `gt-share-${randomUUID().slice(0, 8)}`; await pool.execute(`INSERT INTO trips (id,owner_id,title,tagline,description,cover_image,start_date,end_date,total_days,status,travel_style,total_budget,spent_budget,currency,cities,itinerary,collaborators,is_public,share_id,tags,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [id, req.userId, data.title.trim(), data.tagline || '', data.description || '', data.coverImage || '', data.startDate, data.endDate, data.totalDays || 1, data.status || 'draft', data.travelStyle || 'Solo', data.totalBudget || 0, data.spentBudget || 0, data.currency || 'USD', JSON.stringify(data.cities || []), JSON.stringify(data.itinerary || []), JSON.stringify(data.collaborators || []), data.isPublic !== false, shareId, JSON.stringify(data.tags || []), today, today]); const [rows] = await pool.execute('SELECT * FROM trips WHERE id = ?', [id]); res.status(201).json(tripResponse((rows as any[])[0])); }));
+app.patch('/api/trips/:id', auth, asyncRoute(async (req, res) => { const map: Record<string,string> = { title:'title', tagline:'tagline', description:'description', coverImage:'cover_image', startDate:'start_date', endDate:'end_date', totalDays:'total_days', status:'status', travelStyle:'travel_style', totalBudget:'total_budget', spentBudget:'spent_budget', currency:'currency', cities:'cities', itinerary:'itinerary', collaborators:'collaborators', isPublic:'is_public', tags:'tags' }; const keys = Object.keys(req.body || {}).filter((key) => map[key]); if (!keys.length) return res.status(400).json({ error:'No supported fields supplied' }); const values = keys.map((key) => ['cities','itinerary','collaborators','tags'].includes(key) ? JSON.stringify(req.body[key]) : req.body[key]); const [result] = await pool.execute(`UPDATE trips SET ${keys.map((key) => `\`${map[key]}\` = ?`).join(', ')}, updated_at = ? WHERE id = ? AND owner_id = ?`, [...values, new Date(), req.params.id, req.userId]); if ((result as any).affectedRows === 0) return res.status(404).json({ error:'Trip not found' }); const [rows] = await pool.execute('SELECT * FROM trips WHERE id = ?', [req.params.id]); res.json(tripResponse((rows as any[])[0])); }));
 app.delete('/api/trips/:id', auth, asyncRoute(async (req, res) => { const [result] = await pool.execute('DELETE FROM trips WHERE id = ? AND owner_id = ?', [req.params.id, req.userId!] as any[]); res.json({ deleted: (result as any).affectedRows === 1 }); }));
 app.get('/api/budget', auth, asyncRoute(async (req, res) => {
   const [rows] = await pool.execute('SELECT * FROM expenses WHERE owner_id = ? AND (? = "" OR trip_id = ?) ORDER BY expense_date DESC', [req.userId!, String(req.query.tripId || ''), String(req.query.tripId || '')] as any[]);
@@ -144,7 +168,7 @@ app.get('/api/budget', auth, asyncRoute(async (req, res) => {
   const [tripRows] = await pool.execute('SELECT * FROM trips WHERE owner_id = ? AND (? = "" OR id = ?)', [req.userId!, String(req.query.tripId || ''), String(req.query.tripId || '')] as any[]); const trip = (tripRows as any[])[0]; const totalBudget = trip ? Number(trip.total_budget) : 0; const totalSpent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   res.json({ tripId: trip?.id || '', tripTitle: trip?.title || 'All trips', totalBudget, totalSpent, remainingBudget: Math.max(0, totalBudget - totalSpent), currency: trip?.currency || 'USD', categories: [], dailySpending: [], recentExpenses: expenses, isOverBudget: totalSpent > totalBudget, overBudgetAmount: Math.max(0, totalSpent - totalBudget) });
 }));
-app.post('/api/budget/expenses', auth, asyncRoute(async (req, res) => { const data = req.body; const id = randomUUID(); await pool.execute('INSERT INTO expenses (id, owner_id, trip_id, title, amount, currency, category, expense_date, paid_by, notes, receipt_url) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [id, req.userId, data.tripId, data.title, data.amount, data.currency || 'USD', data.category, data.date, JSON.stringify(data.paidBy || {}), data.notes || null, data.receiptUrl || null]); res.status(201).json({ ...data, id }); }));
+app.post('/api/budget/expenses', auth, asyncRoute(async (req, res) => { const data = req.body || {}; const amount = Number(data.amount); if (!data.tripId || typeof data.title !== 'string' || !data.title.trim() || !Number.isFinite(amount) || amount <= 0 || !data.category || !data.date) return res.status(400).json({ error: 'Trip, title, positive amount, category and date are required' }); const [tripRows] = await pool.execute('SELECT id FROM trips WHERE id = ? AND owner_id = ?', [data.tripId, req.userId!] as any[]); if (!(tripRows as any[]).length) return res.status(404).json({ error: 'Trip not found' }); const id = randomUUID(); await pool.execute('INSERT INTO expenses (id, owner_id, trip_id, title, amount, currency, category, expense_date, paid_by, notes, receipt_url) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [id, req.userId, data.tripId, data.title.trim(), amount, data.currency || 'USD', data.category, data.date, JSON.stringify(data.paidBy || {}), data.notes || null, data.receiptUrl || null]); await pool.execute('UPDATE trips SET spent_budget = spent_budget + ?, updated_at = ? WHERE id = ? AND owner_id = ?', [amount, new Date(), data.tripId, req.userId]); res.status(201).json({ ...data, id, amount, title: data.title.trim() }); }));
 
 app.use((error: any, _req: Request, res: Response, _next: NextFunction) => { console.error(error); res.status(500).json({ error: 'Internal server error' }); });
 app.listen(port, () => console.log(`GlobeTrotter API listening on http://localhost:${port}`));
