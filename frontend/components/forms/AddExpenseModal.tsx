@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -81,7 +82,7 @@ export function AddExpenseModal({
         },
       });
 
-      toast.success(`Expense "${title}" logged successfully!`);
+      toast.success(Expense "${title}" logged successfully!);
       if (onExpenseAdded) onExpenseAdded();
       setTitle("");
       setAmount("");
