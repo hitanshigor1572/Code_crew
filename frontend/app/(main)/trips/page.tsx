@@ -206,8 +206,14 @@ export default function MyTripsPage() {
         <CollaborationModal
           isOpen={!!sharingTrip}
           onClose={() => setSharingTrip(null)}
+          tripId={sharingTrip.id}
+          shareId={sharingTrip.shareId}
           tripTitle={sharingTrip.title}
           collaborators={sharingTrip.collaborators}
+          onCollaboratorsChange={(collaborators) => {
+            setTrips((prev) => prev.map((trip) => (trip.id === sharingTrip.id ? { ...trip, collaborators } : trip)));
+            setSharingTrip((prev) => (prev ? { ...prev, collaborators } : prev));
+          }}
         />
       )}
     </div>

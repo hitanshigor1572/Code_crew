@@ -8,14 +8,6 @@
 
 > **GlobeTrotter** is a modern, full-featured AI-powered travel planning and itinerary management platform built by **Code_crew**. It empowers travelers to seamlessly build multi-city itineraries, manage travel budgets with visual analytics, collaborate with companions in real-time, and get AI-assisted travel recommendations.
 
----
-
-## 📌 Development Branch Status
-
-> [!NOTE]
-> You are currently on the **`development`** branch. This branch contains the latest active features, frontend prototypes, mock services, and upcoming backend integrations.
-
----
 
 ## ✨ Key Features
 
@@ -56,7 +48,7 @@
 | **Forms & Validation** | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
 | **Notifications** | [Sonner](https://sonner.emilkowal.ski/) |
 | **State & Data Layer** | Mock Services (`/lib/services`) transitioning to REST/GraphQL APIs |
-| **Backend (In-Progress)** | Planned Node.js/Express or Next.js API Routes + PostgreSQL / MongoDB |
+| **Backend ** |  Node.js/Express or Next.js API Routes + MySQL |
 
 ---
 
