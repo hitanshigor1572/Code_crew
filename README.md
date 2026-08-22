@@ -203,16 +203,6 @@ To maintain clean code and avoid conflicts on the `development` branch:
 - [ ] **Phase 4: AI & External API Integrations** (Live LLM Trip Generator, Google Places API, Live Flight/Hotel pricing)
 - [ ] **Phase 5: PWA & Mobile Optimization** (Offline itinerary caching, mobile navigation enhancements)
 
----
-
-## 👥 Team & Credits
-
-Developed with ❤️ by the **Code_crew** Team:
-- **Hitanshi Gor** ([@hitanshigor1572](https://github.com/hitanshigor1572))
-- And the **Code_crew** contributors.
-
----
-
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
