@@ -17,6 +17,17 @@ export async function deleteTrip(id: string): Promise<boolean> {
   const result = await api<{ deleted: boolean }>(`/trips/${id}`, { method: 'DELETE' }); return result.deleted;
 }
 
+export async function inviteTripCollaborator(
+  tripId: string,
+  email: string,
+  role: 'editor' | 'viewer' = 'editor'
+): Promise<{ collaborators: Trip['collaborators']; inviteLink: string }> {
+  return api<{ ok: boolean; collaborators: Trip['collaborators']; inviteLink: string }>(`/trips/${encodeURIComponent(tripId)}/invite`, {
+    method: 'POST',
+    body: JSON.stringify({ email, role }),
+  }).then((result) => ({ collaborators: result.collaborators, inviteLink: result.inviteLink }));
+}
+
 export async function cloneTrip(id: string): Promise<Trip | null> {
   const existing = await getTripById(id); if (!existing) return null;
   return createTrip({ ...existing, title: `${existing.title} (Copy)`, status: 'draft', spentBudget: 0 });

@@ -185,8 +185,11 @@ export default function TripDetailsOverviewPage() {
       <CollaborationModal
         isOpen={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
+        tripId={trip.id}
+        shareId={trip.shareId}
         tripTitle={trip.title}
         collaborators={trip.collaborators}
+        onCollaboratorsChange={(collaborators) => setTrip((prev) => (prev ? { ...prev, collaborators } : prev))}
       />
 
       <ExportPdfModal

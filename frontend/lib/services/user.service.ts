@@ -1,6 +1,3 @@
-
-user.service.ts
-
 import { UserProfile } from '@/types/user';
 import { api, saveToken } from '@/lib/api';
 
