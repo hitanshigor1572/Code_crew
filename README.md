@@ -1,54 +1,181 @@
-# 🌍 Smart Collaborative Travel Planner
+<div align="center">
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.1.7-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+# 🌍 GlobeTrotter
+
+### *Next-Gen AI-Powered Collaborative Travel Itinerary & Expense Management Platform*
+
+[![Next.js 15](https://img.shields.io/badge/Next.js-15.1.7-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.17-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Branch](https://img.shields.io/badge/Branch-development-orange?style=for-the-badge&logo=git)](https://github.com/hitanshigor1572/Code_crew/tree/development)
+[![Express.js](https://img.shields.io/badge/Express.js-5.1.0-404D59?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Groq AI](https://img.shields.io/badge/Groq_AI-Llama_3.3_70B-F55036?style=for-the-badge&logo=fastapi&logoColor=white)](https://groq.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-> **GlobeTrotter** is a modern, full-featured AI-powered travel planning and itinerary management platform built by **Code_crew**. It empowers travelers to seamlessly build multi-city itineraries, manage travel budgets with visual analytics, collaborate with companions in real-time, and get AI-assisted travel recommendations.
+<p align="center">
+  <a href="#-project-overview">Overview</a> •
+  <a href="#-problem-statement">Problem</a> •
+  <a href="#-solution-overview">Solution</a> •
+  <a href="#-key-features">Key Features</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-system-architecture">Architecture</a> •
+  <a href="#-getting-started">Installation</a> •
+  <a href="#-demo-preview--screenshots">UI Preview</a> •
+  <a href="#-team--roles">Team</a>
+</p>
 
+---
+
+</div>
+
+## 📖 Project Overview
+
+**GlobeTrotter** is a modern, full-stack, AI-augmented travel planning and collaborative itinerary platform engineered by **Team Code_crew**. Designed for both solo adventurers and group travelers, GlobeTrotter bridges the gap between trip inspiration, meticulous day-by-day scheduling, intelligent budget management, and real-time companion collaboration.
+
+Powered by **Next.js 15**, **Express 5**, **MySQL**, and a context-aware **Groq Llama 3.3 LLM Copilot**, GlobeTrotter eliminates fragmented planning tools by unifying multi-city itineraries, interactive mapping, expense burn analytics, and personalized recommendations into a single, intuitive workspace.
+
+---
+
+## ⚡ Problem Statement
+
+Planning trips today is notoriously fragmented, overwhelming, and inefficient:
+
+1. **Tool Sprawl & Chaos**: Travelers juggle 5–8 separate applications—Google Sheets for budgeting, Notes for itineraries, Google Maps for pins, email threads for confirmations, and chat apps for group coordination.
+2. **Budget Blindspots**: Without real-time tracking and visual expense categorization, travelers routinely exceed budgets and face awkward cost-splitting friction with companions.
+3. **Generic & Out-of-Context AI**: Most AI travel assistants lack context—they don't know the traveler’s actual scheduled stops, remaining budget, travel pace, or dietary preferences.
+4. **Collaboration Friction**: Planning group travel results in conflicting schedules, duplicate bookings, and disconnected communication.
+
+---
+
+## 💡 Solution Overview
+
+**GlobeTrotter** provides an all-in-one ecosystem that transforms chaotic travel planning into an effortless, delightful journey:
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                             GLOBETROTTER                                 │
+├─────────────────┬──────────────────┬──────────────────┬──────────────────┤
+│   🗺️ BUILD      │    🤖 ASSIST     │    💰 TRACK      │    👥 COLLAB     │
+│ Multi-City      │ Context-Aware    │ Category Budgets │ Companion Roles  │
+│ Timelines, Maps │ Groq AI Copilot  │ & Burn Analytics │ & Share Links    │
+└─────────────────┴──────────────────┴──────────────────┴──────────────────┘
+```
+
+- **Unified Canvas**: Seamlessly build multi-city, day-by-day timelines with interactive map pins and local weather widgets.
+- **Context-Aware AI Copilot**: An intelligent AI assistant with live access to user preferences, planned stops, and budget constraints to deliver actionable packing tips, route optimization, and localized recommendations.
+- **Visual Financial Control**: Category-wise budgeting with real-time Recharts visualizations, burn-rate metrics, over-budget warnings, and a live multi-currency converter.
+- **Collaborative Hub**: Share read-only public trip links, invite travel companions with role-based access, and export clean travel dossiers to PDF.
+
+---
 
 ## ✨ Key Features
 
-### 🗺️ Dynamic Itinerary Builder
-- **Multi-City Trip Management**: Plan complex trips with multi-destination stops, arrival/departure schedules, and custom transit notes.
-- **Day-by-Day Timeline Planner**: Organize daily activities with specific times, location tags, activity types (Sightseeing, Dining, Adventure, Relaxation), and costs.
-- **Interactive Route Map & Weather**: Preview destinations with interactive route mapping and integrated local weather forecasts.
-- **Trip Duplication & Sharing**: Clone existing itineraries or share live read-only links with custom public IDs (`/shared/[id]`).
+### 🗺️ 1. Dynamic Multi-City Itinerary Builder
+- **Multi-Stop Structuring**: Organize complex voyages across multiple cities with arrival/departure dates, transport notes, and lodging info.
+- **Day-by-Day Activity Timelines**: Schedule activities by specific time slots (Morning, Afternoon, Evening) with category tags (Culture, Food, Nature, Nightlife).
+- **Interactive Route Map & Forecasts**: Visual route previews and embedded destination weather forecasts to plan weather-appropriate activities.
+- **Trip Duplication & Custom Sharing**: Clone existing itineraries in one click, or generate secure public share links (`/shared/[id]`).
+- **PDF Dossier Export**: Generate clean, printable travel summaries for offline navigation.
 
-### 🤖 AI Travel Assistant
-- Built-in AI Travel Chatbot widget for destination recommendations, itinerary optimization, hidden gems, and packing checklists.
+### 🤖 2. Context-Aware AI Travel Copilot
+- **Live Context Injection**: Unlike generic bots, the AI assistant automatically reads the user's active trip itinerary, budget boundaries, travel pace, and saved destinations.
+- **Ultra-Fast LLM Inference**: Powered by Groq's high-speed inference engine (`llama-3.3-70b-versatile`).
+- **Smart Quick Prompts**: One-click actions for custom packing checklists, local foodie trails, route optimization, and cost comparisons.
 
-### 💰 Budget & Expense Tracker
-- **Visual Analytics**: Interactive Recharts breakdown including Category Pie Charts, Daily Spending Bar Charts, and Budget Burn Trends.
-- **Multi-Category Allocation**: Track flights, lodging, meals, transit, activities, and emergency buffers.
-- **Currency Converter**: Built-in multi-currency conversion utility modal.
+### 💰 3. Visual Budget & Expense Tracker
+- **Visual Analytics with Recharts**:
+  - **Category Pie Chart**: Breakdown across Stays, Flights, Transit, Food, Activities, Shopping, and Misc.
+  - **Daily Spending Bar Chart**: Track daily expense burn vs. daily budget limits.
+  - **Trend Analysis**: Monitor overall budget consumption progress.
+- **Instant Expense Logging**: Log expenses with payment method, category, date, companion attribution, and receipt attachment.
+- **Over-Budget Warnings**: Visual warning badges when expenditures exceed allocated thresholds.
+- **Multi-Currency Converter**: Built-in interactive currency conversion modal for real-time exchange estimations.
 
-### 👥 Collaboration & Community
-- **Companion Invites**: Add travel buddies with role-based access (`Editor` / `Viewer`).
-- **Destination & Activity Discovery Hub**: Explore popular global cities, trending curated community itineraries, and filtered activity searches.
-- **PDF Export**: Export clean printable travel summaries for offline access.
+### 🧭 4. Destination & Activity Discovery Hub
+- **Curated City Guides**: Explore top destinations worldwide with cost indices, popularity metrics, climate overviews, and high-resolution galleries.
+- **Activity Marketplace**: Filter activities by city, category, duration, cost, and user ratings with booking indicators.
 
-### 📊 Admin & Analytics Dashboard
-- Comprehensive metrics monitoring platform users, active trips, popular destinations, and system engagement.
+### 📅 5. Visual Travel Calendar
+- Comprehensive calendar view displaying multi-trip date ranges and scheduled daily events to prevent overlapping bookings.
+
+### 👥 6. Companion Collaboration & Sharing
+- **Role-Based Access**: Invite travel companions as `Editor` or `Viewer`.
+- **Public Share Links**: Shareable responsive itinerary preview for family and friends.
+
+### 🛡️ 7. Security & User Preferences
+- **Dual Authentication**: Secure password-based authentication with bcrypt (12 rounds) & JWT tokens, plus Google OAuth 2.0 integration.
+- **Personalized Traveler Profile**: Customize preferred currency, distance units (km/miles), travel pace (relaxed/moderate/fast), interface themes, and earn travel badges.
+
+### 📊 8. Admin & Platform Analytics
+- Comprehensive platform dashboard monitoring total registered users, active trips, cumulative planned spend, monthly user/trip growth curves, and trending destinations.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technologies |
+### Frontend
+| Technology | Purpose |
 |---|---|
-| **Framework** | [Next.js 15 (App Router)](https://nextjs.org/) |
-| **UI Library** | [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com/), `tailwind-merge`, `tailwindcss-animate` |
-| **Components & Primitives** | [Radix UI](https://www.radix-ui.com/), [Lucide React](https://lucide.dev/) |
-| **Animation** | [Framer Motion](https://www.framer.com/motion/), `canvas-confetti` |
-| **Charts & Data Viz** | [Recharts](https://recharts.org/) |
-| **Forms & Validation** | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
-| **Notifications** | [Sonner](https://sonner.emilkowal.ski/) |
-| **State & Data Layer** | Mock Services (`/lib/services`) transitioning to REST/GraphQL APIs |
-| **Backend ** |  Node.js/Express or Next.js API Routes + MySQL |
+| **Next.js 15** | React Framework with App Router architecture & optimized bundling |
+| **React 19** | Modern UI component rendering with hooks and concurrency |
+| **TypeScript 5** | End-to-end type safety and maintainable codebase |
+| **Tailwind CSS 3** | Utility-first styling with custom design tokens |
+| **Radix UI** | Accessible, headless UI primitives (Dialogs, Dropdowns, Sheets, Tabs) |
+| **Framer Motion** | Smooth UI transitions, staggered animations, and 3D globe effects |
+| **Recharts** | Interactive SVG financial charts and analytics visualizations |
+| **React Hook Form + Zod** | Declarative form handling with schema-based client validation |
+| **Lucide Icons** | Clean, consistent iconography |
+| **Sonner** | Modern, customizable toast notification system |
+
+### Backend & AI
+| Technology | Purpose |
+|---|---|
+| **Node.js & Express 5** | RESTful API server with modular route handlers |
+| **MySQL & mysql2** | Relational data persistence with connection pooling and JSON support |
+| **Groq Cloud API** | Ultra-low latency LLM inference running Llama 3.3 70B Versatile |
+| **JWT & bcryptjs** | Stateless token authentication and cryptographically secure password hashing |
+| **Google Auth Library** | Secure Google OAuth 2.0 verification and social login |
+| **TSX** | TypeScript execution and live hot-reloading in development |
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client["Frontend (Next.js 15 + React 19)"]
+        UI["Tailwind CSS + Radix UI + Framer Motion"]
+        Pages["App Router (Dashboard, Trips, Budget, Discover, Admin)"]
+        Services["Client Service Layer (lib/services)"]
+        Charts["Recharts Visualizations"]
+    end
+
+    subgraph Server["Backend API (Express 5 + TypeScript)"]
+        Router["Express REST Routes (/api/*)"]
+        AuthMiddleware["JWT & OAuth Middleware"]
+        Controllers["Trips, Budget, Cities, Activities, Admin, AI"]
+    end
+
+    subgraph External["External Services & Intelligence"]
+        Groq["Groq Cloud AI (Llama 3.3 70B)"]
+        GoogleOAuth["Google Identity Services"]
+    end
+
+    subgraph Database["Data Layer"]
+        MySQL[("MySQL Database\n(Users, Trips, Expenses, Cities, Activities, Notifications)")]
+    end
+
+    UI --> Pages
+    Pages --> Services
+    Services -- "HTTP / REST (JSON + Bearer Token)" --> Router
+    Router --> AuthMiddleware
+    AuthMiddleware --> Controllers
+    Controllers --> MySQL
+    Controllers -- "Contextual Prompts" --> Groq
+    Router -- "Token Verification" --> GoogleOAuth
+    Controllers --> Charts
+```
 
 ---
 
@@ -56,145 +183,225 @@
 
 ```text
 Code_crew/
-├── REDME.md                    # Project documentation
-├── backend/                    # Backend API service (In Development)
-│   └── .gitkeep
-└── frontend/                   # Next.js 15 Frontend application
-    ├── app/                    # Next.js App Router
-    │   ├── (auth)/             # Authentication routes
-    │   │   ├── login/          # Login page
-    │   │   └── signup/         # Signup page
-    │   ├── (main)/             # Core authenticated application layout
-    │   │   ├── admin/          # Admin dashboard & analytics
-    │   │   ├── budget/         # Global budget & expense overview
-    │   │   ├── calendar/       # Trip calendar & timeline view
-    │   │   ├── dashboard/      # User dashboard & upcoming trips
-    │   │   ├── discover/       # Destination & activity discovery hub
-    │   │   │   └── activities/ # Activity search & filter
-    │   │   ├── profile/        # User profile & settings
-    │   │   └── trips/          # Trip management
-    │   │       ├── [id]/       # Trip detail view & itinerary builder
-    │   │       └── create/     # Step-by-step trip creation wizard
-    │   ├── shared/             # Public shareable trip view (/shared/[id])
-    │   ├── globals.css         # Global Tailwind styles & design tokens
-    │   ├── layout.tsx          # Root HTML layout
-    │   ├── page.tsx            # High-conversion landing page
-    │   └── providers.tsx       # Theme, toast, & context providers
-    ├── components/             # Reusable UI component library
-    │   ├── charts/             # Recharts visualizations (Budget, Spending, Trends)
-    │   ├── common/             # AI Assistant, Modals (Currency, PDF, Collaboration)
-    │   ├── forms/              # Login, Signup, Trip creation, Add Expense forms
-    │   ├── layout/             # AppNavbar, Sidebar, LandingNavbar, Footer, MobileNav
-    │   ├── map/                # Interactive trip maps & 3D Globe Hero
-    │   ├── trip/               # TripCard, ActivityCard, WeatherCard, TimelineItem
-    │   └── ui/                 # Radix UI primitives (Button, Dialog, Card, etc.)
-    ├── data/                   # Mock data & initial seeds (MOCK_TRIPS, MOCK_CITIES)
-    ├── lib/                    # Utilities & business logic
-    │   ├── services/           # Service layer (Trip, City, Budget, Activity, User)
-    │   └── utils.ts            # Helper methods & class merger
-    ├── types/                  # TypeScript interfaces & domain models
-    │   ├── activity.ts         # Activity & booking definitions
-    │   ├── budget.ts           # Expense & category definitions
-    │   ├── city.ts             # City & destination metadata
-    │   ├── trip.ts             # Trip, ItineraryDay, CityStop models
-    │   └── user.ts             # User & companion models
-    ├── next.config.ts          # Next.js configuration
-    ├── package.json            # Dependencies & scripts
-    ├── tailwind.config.ts      # Tailwind styling configuration
-    └── tsconfig.json           # TypeScript configuration
+├── README.md                   # Project documentation & evaluator guide
+├── backend/                    # Express 5 + TypeScript REST API
+│   ├── src/
+│   │   ├── db/
+│   │   │   ├── init.ts         # Schema creation & initial dataset seed script
+│   │   │   └── pool.ts         # MySQL connection pool configuration
+│   │   └── server.ts           # Express application, routes, AI copilot & auth
+│   ├── .env                    # Environment variables configuration
+│   ├── package.json            # Backend dependencies and scripts
+│   └── tsconfig.json           # Backend TypeScript configuration
+└── frontend/                   # Next.js 15 App Router Frontend
+    ├── app/
+    │   ├── (auth)/             # Auth routes (login, signup)
+    │   ├── (main)/             # Authenticated workspace layout
+    │   │   ├── admin/          # Admin performance & metrics dashboard
+    │   │   ├── budget/         # Budget overview & expense management
+    │   │   ├── calendar/       # Travel calendar & scheduled itineraries
+    │   │   ├── dashboard/      # User dashboard & upcoming adventures
+    │   │   ├── discover/       # Destination & activity discovery marketplace
+    │   │   ├── profile/        # Traveler profile, settings, & badges
+    │   │   └── trips/          # Trip creation wizard, detail view, & timeline builder
+    │   ├── shared/[id]/        # Public responsive shareable itinerary page
+    │   ├── globals.css         # Tailwind directives & design system tokens
+    │   ├── layout.tsx          # Root application layout
+    │   ├── page.tsx            # High-conversion landing page with 3D Globe
+    │   └── providers.tsx       # Theme, tooltip, and toast providers
+    ├── components/
+    │   ├── charts/             # BudgetPieChart, SpendingBarChart, TripTrendsAreaChart
+    │   ├── common/             # AITravelAssistant, CurrencyConverter, ExportPdfModal
+    │   ├── forms/              # LoginForm, SignupForm, CreateTripForm, AddExpenseModal
+    │   ├── layout/             # AppNavbar, AppSidebar, LandingNavbar, Footer
+    │   ├── map/                # AnimatedGlobeHero, InteractiveTripMap
+    │   ├── trip/               # TripCard, ActivityCard, DestinationCard, WeatherCard
+    │   └── ui/                 # Accessible Radix UI components
+    ├── data/                   # Mock fallback seeds & static definitions
+    ├── lib/
+    │   ├── api.ts              # Universal client fetch wrapper with auth injection
+    │   ├── services/           # Domain services (trip, city, budget, activity, user)
+    │   └── utils.ts            # Class merge utilities (clsx + tailwind-merge)
+    ├── types/                  # Domain TypeScript interfaces (trip, budget, city, user)
+    ├── next.config.ts          # Next.js build configuration
+    ├── package.json            # Frontend dependencies and scripts
+    ├── tailwind.config.ts      # Tailwind CSS theme configuration
+    └── tsconfig.json           # Frontend TypeScript configuration
 ```
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these steps to set up the project locally on your machine.
+Follow these steps to run the complete GlobeTrotter platform locally.
 
 ### Prerequisites
-- **Node.js**: `v18.18.0` or higher (Recommended: `v20+`)
+- **Node.js**: `v18.18.0` or higher (Recommended: `v20.x`)
+- **MySQL Server**: `v8.0+` running locally or via Docker
 - **Package Manager**: `npm`, `pnpm`, or `yarn`
-- **Git**
 
-### Installation
+---
 
-1. **Clone the repository and switch to `development` branch:**
+### Step 1: Clone the Repository
+```bash
+git clone -b development https://github.com/hitanshigor1572/Code_crew.git
+cd Code_crew
+```
+
+---
+
+### Step 2: Configure & Start the Backend
+
+1. Navigate to the `backend` folder:
    ```bash
-   git clone -b development https://github.com/hitanshigor1572/Code_crew.git
-   cd Code_crew
+   cd backend
    ```
 
-2. **Navigate to the frontend directory:**
-   ```bash
-   cd frontend
-   ```
-
-3. **Install dependencies:**
+2. Install backend dependencies:
    ```bash
    npm install
    ```
 
-4. **Run the local development server:**
+3. Configure your `.env` file inside `backend/.env`:
+   ```env
+   PORT=4000
+   FRONTEND_URL=http://localhost:3000
+   JWT_SECRET=your-super-secret-jwt-key
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=your_mysql_password
+   DB_NAME=globetrotter
+
+   # AI Copilot (Groq Cloud)
+   GROQ_API_KEY=your_groq_api_key
+   GROQ_MODEL=llama-3.3-70b-versatile
+
+   # Optional Google OAuth
+   # GOOGLE_CLIENT_ID=your_google_client_id
+   # GOOGLE_CLIENT_SECRET=your_google_client_secret
+   # GOOGLE_REDIRECT_URI=http://localhost:4000/api/auth/google/callback
+   ```
+
+4. Initialize and seed the MySQL database:
+   ```bash
+   npm run db:init
+   ```
+   > *This creates all tables and populates curated demo cities, activities, and a sample user account.*
+
+5. Start the backend API server:
+   ```bash
+   npm run dev
+   ```
+   The backend API will be live at **`http://localhost:4000`**.
+
+---
+
+### Step 3: Configure & Start the Frontend
+
+1. Open a new terminal window and navigate to the `frontend` folder:
+   ```bash
+   cd frontend
+   ```
+
+2. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the Next.js development server:
    ```bash
    npm run dev
    ```
 
-5. **Open your browser:**
-   Navigate to [http://localhost:3000](http://localhost:3000) to view the application.
+4. Open your browser and navigate to:
+   ```
+   http://localhost:3000
+   ```
 
 ---
 
-## 📜 Available Scripts
+## � Demo Account Credentials
 
-Inside the `frontend/` directory, you can run:
+For quick evaluation without manual signup, use the seeded demo account:
 
-| Command | Description |
+| Field | Value |
 |---|---|
-| `npm run dev` | Starts the development server with Turbopack / hot-reloading at `localhost:3000` |
-| `npm run build` | Builds the optimized production build |
-| `npm run start` | Starts the production server |
-| `npm run lint` | Runs ESLint to check for code quality and syntax issues |
+| **Email** | `alex.morgan@globetrotter.io` |
+| **Password** | `password123` |
+| **Role** | Demo Traveler / Explorer |
+
+> *You can also create a brand new account using the Sign Up form or configure Google OAuth for one-click login.*
 
 ---
 
-## 🌿 Git Branching & Contribution Workflow
+##  API Reference Summary
 
-To maintain clean code and avoid conflicts on the `development` branch:
-
-1. **Always pull latest changes before starting work:**
-   ```bash
-   git checkout development
-   git pull origin development
-   ```
-
-2. **Create a dedicated feature or bugfix branch:**
-   ```bash
-   # For new features
-   git checkout -b feature/trip-drag-and-drop
-
-   # For bug fixes
-   git checkout -b fix/budget-currency-rounding
-   ```
-
-3. **Commit your changes using conventional commits:**
-   ```bash
-   git commit -m "feat(trip-builder): add drag-and-drop reordering for itinerary stops"
-   ```
-
-4. **Push your branch and open a Pull Request against `development`:**
-   ```bash
-   git push origin feature/trip-drag-and-drop
-   ```
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|:---:|
+| `POST` | `/api/auth/signup` | Register a new user | No |
+| `POST` | `/api/auth/login` | Authenticate user & receive JWT | No |
+| `GET` | `/api/auth/google` | Initiate Google OAuth 2.0 flow | No |
+| `GET` | `/api/users/me` | Fetch active user profile & preferences | Yes |
+| `PATCH` | `/api/users/me` | Update travel pace, currency, bio, etc. | Yes |
+| `GET` | `/api/trips` | Retrieve user's trips (filterable by status) | Yes |
+| `POST` | `/api/trips` | Create a new trip with multi-city metadata | Yes |
+| `GET` | `/api/trips/:id` | Get detailed trip itinerary by ID or share ID | Optional |
+| `PATCH` | `/api/trips/:id` | Update itinerary stops, dates, and budget | Yes |
+| `DELETE` | `/api/trips/:id` | Remove a trip | Yes |
+| `GET` | `/api/budget` | Get budget analytics, categories & daily spend | Yes |
+| `POST` | `/api/budget/expenses` | Add a new categorized expense | Yes |
+| `POST` | `/api/ai/chat` | Send message to context-aware Groq AI Copilot | Yes |
+| `GET` | `/api/cities` | Search curated global cities & metadata | No |
+| `GET` | `/api/activities` | Query activities with filters (category, city) | No |
+| `GET` | `/api/admin/metrics` | Platform analytics & user growth metrics | Admin |
 
 ---
 
-## 🗺️ Roadmap & Upcoming Milestones
+## 📸 Demo Preview & Interface Showcase
 
-- [x] **Phase 1: Frontend Architecture & UI System** (Landing page, Auth, Dashboard, Trip Builder, Budget Charts)
-- [ ] **Phase 2: Backend & Database Integration** (REST/GraphQL API, PostgreSQL/Prisma, User Auth JWT/OAuth)
-- [ ] **Phase 3: Live Real-Time Collaboration** (WebSockets / Supabase Realtime for concurrent trip planning)
-- [ ] **Phase 4: AI & External API Integrations** (Live LLM Trip Generator, Google Places API, Live Flight/Hotel pricing)
-- [ ] **Phase 5: PWA & Mobile Optimization** (Offline itinerary caching, mobile navigation enhancements)
+| View | Description | Preview |
+|---|---|:---:|
+| **Landing & Hero** | 3D interactive globe, dynamic stats, testimonials & feature showcases | `[ Hero & Globe Preview ]` |
+| **Dashboard** | Overview of upcoming trips, quick actions, expense summaries & AI prompts | `[ Dashboard Preview ]` |
+| **Itinerary Builder** | Day-by-day timeline, interactive map pins, activity scheduling & weather | `[ Itinerary Builder Preview ]` |
+| **Budget Analytics** | Recharts category allocation, daily burn rates, and expense logging modal | `[ Budget Analytics Preview ]` |
+| **AI Travel Copilot** | Context-aware slide-out chat assistant powered by Groq Llama 3.3 | `[ AI Assistant Preview ]` |
+| **Admin Portal** | Platform analytics, user growth curves, and trip management | `[ Admin Dashboard Preview ]` |
+
+---
+
+## 🔮 Future Improvements & Roadmap
+
+- [ ] **Real-Time Concurrent Collaboration**: WebSocket/Supabase Realtime integration for live multiplayer cursor editing and instant chat.
+- [ ] **External Live Booking Integrations**: Direct price-checking and booking links via Amadeus / Skyscanner and Booking.com APIs.
+- [ ] **Smart OCR Receipt Scanner**: Upload receipt photos to auto-populate expense title, amount, currency, and category using Vision AI.
+- [ ] **Offline Progressive Web App (PWA)**: Full offline service worker caching with GPS-enabled walking directions for on-the-go travelers.
+- [ ] **Community Itinerary Marketplace**: Allow verified creators to publish, monetize, and share custom travel itineraries.
+
+---
+
+## 👥 Team & Roles
+
+Crafted with passion for the Hackathon by **Team Code_crew**:
+
+| Member | Primary Focus & Contributions | GitHub Profile |
+|---|---|:---:|
+| **Hitanshi Gor** | Frontend Architecture, Design System & UI/UX Component Library | [@hitanshigor1572](https://github.com/hitanshigor1572) |
+| **Jay Prajapati** | Backend Architecture, Express REST API, Auth & Groq AI Copilot | [@jayprajapati19](https://github.com/jayprajapati19) |
+| **Shivani Siddhpura** | Database Architecture, Schema Migrations, Seeding & Documentation | [@shivanisiddhpura244](https://github.com/shivanisiddhpura244) |
+| **Chaitany Bumtariya** | Client Services Layer, State Flow, Profile & Preference Management | [@Chaitany106](https://github.com/Chaitany106) |
+
+---
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is open-source and licensed under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+     <sub>Built with ❤️ by <b>Code_crew</b> for the Hackathon. If you find GlobeTrotter inspiring, give it a ⭐ on GitHub!</sub>
+</div>
+  <sub>Built with ❤️ by <b>Code_crew</b> for the Hackathon. If you find GlobeTrotter inspiring, give it a ⭐ on GitHub!</sub>
+</div>
