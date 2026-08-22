@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 interface AITravelAssistantProps {
   isOpen: boolean;
@@ -63,7 +64,7 @@ export function AITravelAssistant({ isOpen, onClose }: AITravelAssistantProps) {
     }
   }, [messages, isTyping]);
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const text = textToSend || inputValue;
     if (!text.trim()) return;
 
@@ -77,37 +78,13 @@ export function AITravelAssistant({ isOpen, onClose }: AITravelAssistantProps) {
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInputValue("");
     setIsTyping(true);
-
-    setTimeout(() => {
-      let aiResponseText = "";
-      let suggestions: string[] = [];
-
-      if (text.toLowerCase().includes("paris") || text.toLowerCase().includes("food")) {
-        aiResponseText = `Here is a curated 3-Day Paris Epicurean Trail:\n\n🥖 **Day 1: Classic Marais & Saint-Germain**\n• Morning: Flaky croissants at Du Pain et des Idées\n• Afternoon: Wine & Comté cheese tasting in Latin Quarter cellar\n• Evening: 4-course Seine gourmet sunset cruise\n\n🍷 **Day 2: Montmartre Bohemian Bites**\n• Morning: Artisanal eclair tasting at Place du Tertre\n• Evening: Traditional duck confit at Le Relais de Venise\n\nWould you like me to insert this directly into your **Paris Explorer** itinerary?`;
-        suggestions = ["Add this to my Paris Trip", "Find wine bars near Le Marais"];
-      } else if (text.toLowerCase().includes("pack") || text.toLowerCase().includes("tokyo")) {
-        aiResponseText = `🎒 **Tokyo October Packing Checklist:**\n\n✅ **Clothing (Average 18°C–22°C):** Lightweight layers, trench coat or windbreaker, comfortable walking sneakers (expect 15k+ steps/day), slip-on shoes for temples.\n✅ **Tech:** Suica/Pasmo IC card in Apple/Google Wallet, pocket Wi-Fi or eSIM, 2-prong Type A power adapter.\n✅ **Etiquette essentials:** Small handkerchief (many restrooms lack dryers), coin pouch for 100/500 yen coins.`;
-        suggestions = ["Add packing list to notes", "Check Tokyo subway tips"];
-      } else if (text.toLowerCase().includes("bali") || text.toLowerCase().includes("goa")) {
-        aiResponseText = `📊 **Cost & Vibe Comparison (5 Days):**\n\n• **Bali ($425 total avg):** Tropical wellness, emerald rice terraces, luxury private pool villas ($70/night), world-class surf.\n• **Goa ($290 total avg):** Portuguese heritage architecture, fiery seafood curries, beach shacks, vibrant night markets.\n\n*Verdict:* Choose **Bali** for exotic luxury and wellness, or **Goa** for high-energy coastal relaxation on a tighter budget!`;
-        suggestions = ["Create a Bali Itinerary", "Create a Goa Itinerary"];
-      } else {
-        aiResponseText = `Great question! Based on your travel preferences (moderate pace, boutique stays, culinary highlights), I recommend exploring our multi-city itinerary builder. You can easily add stops, balance daily budgets, and visualize connecting trains or flights with one click.`;
-        suggestions = ["Show trending cities", "Optimize my current trip"];
-      }
-
-      setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `ai-${Date.now()}`,
-          sender: "ai",
-          text: aiResponseText,
-          timestamp: "Just now",
-          suggestions,
-        },
-      ]);
-    }, 900);
+    try {
+      const history = [...messages, userMsg].map((item) => ({ role: item.sender === "ai" ? "assistant" : "user", content: item.text }));
+      const result = await api<{ text: string }>("/ai/chat", { method: "POST", body: JSON.stringify({ message: text.trim(), history }) });
+      setMessages((prev) => [...prev, { id: `ai-${Date.now()}`, sender: "ai", text: result.text, timestamp: "Just now" }]);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Copilot is temporarily unavailable");
+    } finally { setIsTyping(false); }
   };
 
   return (

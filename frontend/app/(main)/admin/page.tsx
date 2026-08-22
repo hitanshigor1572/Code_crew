@@ -20,13 +20,23 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { TripTrendsAreaChart } from "@/components/charts/TripTrendsAreaChart";
 import { BudgetCard } from "@/components/trip/BudgetCard";
-import { MOCK_ADMIN_METRICS, MOCK_TRIPS } from "@/data/mock";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { api } from "@/lib/api";
+import { getTrips } from "@/lib/services/trip.service";
 
 export default function AdminDashboardPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [metrics, setMetrics] = React.useState<any>(null);
+  const [trips, setTrips] = React.useState<any[]>([]);
 
-  const filteredTrips = MOCK_TRIPS.filter(
+  React.useEffect(() => {
+    Promise.all([api<any>("/admin/metrics"), getTrips()]).then(([loadedMetrics, loadedTrips]) => {
+      setMetrics(loadedMetrics);
+      setTrips(loadedTrips);
+    }).catch(() => undefined);
+  }, []);
+
+  const filteredTrips = trips.filter(
     (t) =>
       t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.collaborators[0]?.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -59,7 +69,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <BudgetCard
           title="Total Active Users"
-          amount={MOCK_ADMIN_METRICS.totalUsers}
+          amount={metrics?.totalUsers || 0}
           currency=""
           subtitle="+18% MoM Growth"
           icon={Users}
@@ -68,7 +78,7 @@ export default function AdminDashboardPage() {
         />
         <BudgetCard
           title="Trips Created"
-          amount={MOCK_ADMIN_METRICS.activeTrips}
+          amount={metrics?.activeTrips || 0}
           currency=""
           subtitle="94% Completion Rate"
           icon={PlaneTakeoff}
@@ -77,7 +87,7 @@ export default function AdminDashboardPage() {
         />
         <BudgetCard
           title="Total Travel Spend Planned"
-          amount={MOCK_ADMIN_METRICS.totalSavedUSD}
+          amount={metrics?.totalSavedUSD || 0}
           currency="USD"
           subtitle="Processed via itineraries"
           icon={TrendingUp}
@@ -85,7 +95,7 @@ export default function AdminDashboardPage() {
         />
         <BudgetCard
           title="Global Cities Mapped"
-          amount={MOCK_ADMIN_METRICS.totalCitiesMapped}
+          amount={metrics?.totalCitiesMapped || 0}
           currency=""
           subtitle="Across 6 continents"
           icon={Globe2}
@@ -116,7 +126,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <TripTrendsAreaChart data={MOCK_ADMIN_METRICS.userGrowth} />
+          <TripTrendsAreaChart data={metrics?.userGrowth || []} />
         </Card>
 
         {/* Popular Cities Leaderboard (4 cols) */}
@@ -131,7 +141,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="space-y-4 pt-2">
-            {MOCK_ADMIN_METRICS.popularDestinations.map((dest, idx) => (
+            {(metrics?.popularDestinations || []).map((dest: any, idx: number) => (
               <div key={dest.name} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
