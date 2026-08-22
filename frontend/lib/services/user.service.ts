@@ -1,29 +1,11 @@
-import { MOCK_USER } from '@/data/mock';
 import { UserProfile } from '@/types/user';
+import { api, saveToken } from '@/lib/api';
 
-let userStore: UserProfile = { ...MOCK_USER };
+export async function getCurrentUser(): Promise<UserProfile> { return api<UserProfile>('/users/me'); }
 
-export async function getCurrentUser(): Promise<UserProfile> {
-  await new Promise((resolve) => setTimeout(resolve, 50));
-  return { ...userStore };
-}
+export async function updateUserProfile(updates: Partial<UserProfile>): Promise<UserProfile> { return api<UserProfile>('/users/me', { method: 'PATCH', body: JSON.stringify(updates) }); }
 
-export async function updateUserProfile(updates: Partial<UserProfile>): Promise<UserProfile> {
-  await new Promise((resolve) => setTimeout(resolve, 80));
-  userStore = {
-    ...userStore,
-    ...updates,
-  };
-  return { ...userStore };
-}
+export async function toggleSaveDestination(cityId: string): Promise<string[]> { const user = await getCurrentUser(); const savedDestinations = user.savedDestinations.includes(cityId) ? user.savedDestinations.filter((id) => id !== cityId) : [...user.savedDestinations, cityId]; await updateUserProfile({ savedDestinations }); return savedDestinations; }
 
-export async function toggleSaveDestination(cityId: string): Promise<string[]> {
-  await new Promise((resolve) => setTimeout(resolve, 50));
-  const exists = userStore.savedDestinations.includes(cityId);
-  if (exists) {
-    userStore.savedDestinations = userStore.savedDestinations.filter((id) => id !== cityId);
-  } else {
-    userStore.savedDestinations = [...userStore.savedDestinations, cityId];
-  }
-  return [...userStore.savedDestinations];
-}
+export async function login(email: string, password: string) { const result = await api<{ token: string; user: UserProfile }>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }); saveToken(result.token); return result.user; }
+export async function signup(fullName: string, email: string, password: string) { const result = await api<{ token: string; user: UserProfile }>('/auth/signup', { method: 'POST', body: JSON.stringify({ fullName, email, password }) }); saveToken(result.token); return result.user; }

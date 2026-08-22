@@ -49,8 +49,11 @@ import { InteractiveTripMap } from "@/components/map/InteractiveTripMap";
 import { CollaborationModal } from "@/components/common/CollaborationModal";
 import { ExportPdfModal } from "@/components/common/ExportPdfModal";
 import { getTripById, updateTrip } from "@/lib/services/trip.service";
-import { MOCK_CITIES, MOCK_ACTIVITIES } from "@/data/mock";
+import { getCities } from "@/lib/services/city.service";
+import { getActivities } from "@/lib/services/activity.service";
 import { Trip, CityStop, ItineraryDay, ItineraryItem } from "@/types/trip";
+import { City } from "@/types/city";
+import { Activity } from "@/types/activity";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -60,6 +63,8 @@ export default function ItineraryBuilderPage() {
   const router = useRouter();
 
   const [trip, setTrip] = React.useState<Trip | null>(null);
+  const [cities, setCities] = React.useState<City[]>([]);
+  const [activities, setActivities] = React.useState<Activity[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [activeStopIndex, setActiveStopIndex] = React.useState(0);
   const [selectedDayNumber, setSelectedDayNumber] = React.useState(1);
@@ -71,7 +76,7 @@ export default function ItineraryBuilderPage() {
   const [exportModalOpen, setExportModalOpen] = React.useState(false);
 
   // Form states for Add Stop
-  const [selectedCityId, setSelectedCityId] = React.useState<string>(MOCK_CITIES[0].id);
+  const [selectedCityId, setSelectedCityId] = React.useState<string>("");
   const [stayNights, setStayNights] = React.useState<number>(3);
 
   // Form states for Add Activity
@@ -83,8 +88,11 @@ export default function ItineraryBuilderPage() {
   React.useEffect(() => {
     async function loadTrip() {
       try {
-        const data = await getTripById(tripId);
+        const [data, loadedCities, loadedActivities] = await Promise.all([getTripById(tripId), getCities(), getActivities()]);
         setTrip(data);
+        setCities(loadedCities);
+        setActivities(loadedActivities);
+        if (loadedCities[0]) setSelectedCityId(loadedCities[0].id);
       } finally {
         setLoading(false);
       }
@@ -147,7 +155,7 @@ export default function ItineraryBuilderPage() {
   // Add new Stop
   const handleAddStopSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const city = MOCK_CITIES.find((c) => c.id === selectedCityId);
+    const city = cities.find((c) => c.id === selectedCityId);
     if (!city) return;
 
     const newStop: CityStop = {
@@ -476,7 +484,7 @@ export default function ItineraryBuilderPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl">
-                  {MOCK_CITIES.map((c) => (
+                  {cities.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}, {c.country}
                     </SelectItem>

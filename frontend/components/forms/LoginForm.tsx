@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { login } from "@/lib/services/user.service";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
@@ -44,11 +45,9 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    // Simulate brief authentication check
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsLoading(false);
-    toast.success("Welcome back, Alexandre!");
-    router.push("/dashboard");
+    try { const user = await login(data.email, data.password); toast.success(`Welcome back, ${user.name}!`); router.push("/dashboard"); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "Unable to sign in"); }
+    finally { setIsLoading(false); }
   };
 
   return (

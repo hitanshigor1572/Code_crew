@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { signup } from "@/lib/services/user.service";
 
 const signupSchema = z
   .object({
@@ -64,10 +65,9 @@ export function SignupForm() {
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsLoading(false);
-    toast.success("Account created successfully! Welcome to GlobeTrotter.");
-    router.push("/dashboard");
+    try { await signup(data.fullName, data.email, data.password); toast.success("Account created successfully! Welcome to GlobeTrotter."); router.push("/dashboard"); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "Unable to create account"); }
+    finally { setIsLoading(false); }
   };
 
   return (
