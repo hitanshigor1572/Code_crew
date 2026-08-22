@@ -142,7 +142,7 @@ export function Footer() {
 
         {/* Bottom copyright */}
         <div className="mt-12 pt-8 border-t border-zinc-200/80 dark:border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-400 gap-4">
-          <p>© {new Date().getFullYear()} GlobeTrotter Inc. All rights reserved.</p>
+          <p>© 2026 GlobeTrotter Inc. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               Crafted with <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" /> for global travelers

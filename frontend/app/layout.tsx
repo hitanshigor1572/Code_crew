@@ -41,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
-      <body className="min-h-screen bg-background font-sans antialiased selection:bg-primary/20 selection:text-primary">
+      <body suppressHydrationWarning className="min-h-screen bg-background font-sans antialiased selection:bg-primary/20 selection:text-primary">
         <Providers>{children}</Providers>
       </body>
     </html>
