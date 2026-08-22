@@ -24,9 +24,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { MOCK_CITIES } from "@/data/mock";
+import { getCities } from "@/lib/services/city.service";
+import { getCurrentUser } from "@/lib/services/user.service";
 import { createTrip } from "@/lib/services/trip.service";
-import { formatCurrency, formatDateRange } from "@/lib/utils";
+import { formatCurrency, formatDateRange, getDaysDifference } from "@/lib/utils";
+import { City } from "@/types/city";
+import { UserProfile } from "@/types/user";
 import { TravelStyle, Trip } from "@/types/trip";
 import { toast } from "sonner";
 
@@ -87,6 +90,13 @@ interface CreateTripFormProps {
 export function CreateTripForm({ initialCityId }: CreateTripFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [cities, setCities] = React.useState<City[]>([]);
+  const [user, setUser] = React.useState<UserProfile | null>(null);
+
+  React.useEffect(() => {
+    getCities().then(setCities).catch(() => toast.error("Unable to load destinations"));
+    getCurrentUser().then(setUser).catch(() => undefined);
+  }, []);
 
   const {
     register,
@@ -98,7 +108,7 @@ export function CreateTripForm({ initialCityId }: CreateTripFormProps) {
     resolver: zodResolver(tripFormSchema),
     defaultValues: {
       title: initialCityId
-        ? `${MOCK_CITIES.find((c) => c.id === initialCityId)?.name || "Destination"} Expedition`
+        ? "Destination Expedition"
         : "European Summer Grand Tour",
       tagline: "Historic streets, boutique stays, culinary gems & scenic train hops",
       description:
@@ -130,19 +140,28 @@ export function CreateTripForm({ initialCityId }: CreateTripFormProps) {
   const onSubmit = async (data: TripFormData) => {
     setIsSubmitting(true);
 
+    const totalDays = getDaysDifference(data.startDate, data.endDate);
     const selectedCitiesDetails = data.selectedCityIds
       .map((id, index) => {
-        const city = MOCK_CITIES.find((c) => c.id === id);
+        const city = cities.find((item) => item.id === id);
         if (!city) return null;
+        const daysBefore = Math.floor((totalDays / data.selectedCityIds.length) * index);
+        const stayDurationDays = index === data.selectedCityIds.length - 1
+          ? totalDays - daysBefore
+          : Math.max(1, Math.floor(totalDays / data.selectedCityIds.length));
+        const arrival = new Date(`${data.startDate}T00:00:00`);
+        arrival.setDate(arrival.getDate() + daysBefore);
+        const departure = new Date(arrival);
+        departure.setDate(departure.getDate() + stayDurationDays - 1);
         return {
-          id: `stop-${Date.now()}-${index}`,
+          id: `stop-${crypto.randomUUID()}-${index}`,
           cityId: city.id,
           cityName: city.name,
           country: city.country,
           coverImage: city.image,
-          arrivalDate: data.startDate,
-          departureDate: data.endDate,
-          stayDurationDays: 3,
+          arrivalDate: arrival.toISOString().slice(0, 10),
+          departureDate: departure.toISOString().slice(0, 10),
+          stayDurationDays,
           coordinates: city.coordinates,
           order: index + 1,
         };
@@ -157,7 +176,7 @@ export function CreateTripForm({ initialCityId }: CreateTripFormProps) {
         coverImage: data.coverImage,
         startDate: data.startDate,
         endDate: data.endDate,
-        totalDays: 8,
+        totalDays,
         status: "upcoming",
         travelStyle: data.travelStyle as TravelStyle,
         totalBudget: data.totalBudget,
@@ -167,11 +186,10 @@ export function CreateTripForm({ initialCityId }: CreateTripFormProps) {
         itinerary: [],
         collaborators: [
           {
-            id: "usr-alex-01",
-            name: "Alexandre Morgan",
-            email: "alex.morgan@globetrotter.io",
-            avatar:
-              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+            id: user?.id || "owner",
+            name: user?.name || "Trip Owner",
+            email: user?.email || "",
+            avatar: user?.avatar || "",
             role: "owner",
             status: "active",
           },
@@ -256,7 +274,7 @@ export function CreateTripForm({ initialCityId }: CreateTripFormProps) {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
-              {MOCK_CITIES.map((city) => {
+              {cities.map((city) => {
                 const isSelected = formData.selectedCityIds?.includes(city.id);
                 return (
                   <button
@@ -485,7 +503,7 @@ export function CreateTripForm({ initialCityId }: CreateTripFormProps) {
             {/* Selected Stops Preview Pills */}
             <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap gap-1.5">
               {formData.selectedCityIds?.map((id) => {
-                const city = MOCK_CITIES.find((c) => c.id === id);
+                const city = cities.find((item) => item.id === id);
                 return (
                   <span
                     key={id}

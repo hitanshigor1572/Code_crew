@@ -25,8 +25,8 @@ import { formatDateRange, formatCurrency } from "@/lib/utils";
 
 export default function CalendarTimelinePage() {
   const [trips, setTrips] = React.useState<Trip[]>([]);
-  const [selectedDate, setSelectedDate] = React.useState<number>(12); // Day 12 of September
-  const [currentMonth, setCurrentMonth] = React.useState("September 2026");
+  const [selectedDate, setSelectedDate] = React.useState("2026-09-12");
+  const [currentMonth, setCurrentMonth] = React.useState(() => new Date(2026, 8, 1));
 
   React.useEffect(() => {
     async function loadTrips() {
@@ -36,36 +36,24 @@ export default function CalendarTimelinePage() {
     loadTrips();
   }, []);
 
-  // 30 days of September
-  const daysInMonth = Array.from({ length: 30 }, (_, i) => i + 1);
-
-  // Calendar activities for selected day
-  const activeDayActivities = [
-    {
-      time: "09:30 AM – 11:00 AM",
-      title: "Montmartre Artisan Bakery & Croissant Trail",
-      category: "Food",
-      cost: 45,
-      location: "Montmartre, Paris",
-      image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&auto=format&fit=crop&q=80",
-    },
-    {
-      time: "02:00 PM – 05:00 PM",
-      title: "Louvre Museum Priority Masterclass",
-      category: "Culture",
-      cost: 75,
-      location: "Louvre Courtyard",
-      image: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=400&auto=format&fit=crop&q=80",
-    },
-    {
-      time: "07:30 PM – 10:00 PM",
-      title: "Seine River Sunset Gourmet Dinner Cruise",
-      category: "Food",
-      cost: 110,
-      location: "Port de la Bourdonnais",
-      image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&auto=format&fit=crop&q=80",
-    },
-  ];
+  const monthLabel = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const monthKey = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}`;
+  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+  const monthStartOffset = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+  const itineraryEvents = trips.flatMap((trip) => trip.itinerary.flatMap((day) => day.items.map((item) => ({
+    date: day.date,
+    time: item.startTime && item.endTime ? `${item.startTime} – ${item.endTime}` : day.cityName,
+    title: item.title,
+    category: item.category,
+    cost: item.cost,
+    location: item.locationName,
+    image: item.image || trip.coverImage,
+    tripTitle: trip.title,
+  }))));
+  const activeDayActivities = itineraryEvents.filter((event) => event.date === selectedDate);
+  const selectedTrip = trips.find((trip) => selectedDate >= trip.startDate && selectedDate <= trip.endDate);
+  const selectedDateLabel = new Date(`${selectedDate}T00:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const shiftMonth = (offset: number) => setCurrentMonth((month) => new Date(month.getFullYear(), month.getMonth() + offset, 1));
 
   return (
     <div className="space-y-8">
@@ -93,18 +81,18 @@ export default function CalendarTimelinePage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCurrentMonth("August 2026")}
+            onClick={() => shiftMonth(-1)}
             className="h-8 w-8 rounded-xl"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-xs font-bold px-3 text-zinc-800 dark:text-zinc-200">
-            {currentMonth}
+            {monthLabel}
           </span>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCurrentMonth("October 2026")}
+            onClick={() => shiftMonth(1)}
             className="h-8 w-8 rounded-xl"
           >
             <ChevronRight className="h-4 w-4" />
@@ -118,11 +106,11 @@ export default function CalendarTimelinePage() {
           <Card className="p-6 rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-900/90 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
               <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-50">
-                September 2026 Monthly View
+                {monthLabel} Monthly View
               </h3>
               <div className="flex items-center gap-2 text-xs">
                 <span className="flex items-center gap-1 text-primary font-semibold">
-                  <span className="h-2 w-2 rounded-full bg-primary" /> Paris Trip (12-18)
+                  <span className="h-2 w-2 rounded-full bg-primary" /> {trips.length} planned trip{trips.length === 1 ? "" : "s"}
                 </span>
               </div>
             </div>
@@ -140,19 +128,20 @@ export default function CalendarTimelinePage() {
 
             {/* Days Grid */}
             <div className="grid grid-cols-7 gap-2">
-              {/* 2 Empty offset days for Sep 2026 starting Tuesday */}
-              <div className="h-20 rounded-2xl bg-transparent" />
-              <div className="h-20 rounded-2xl bg-transparent" />
+              {Array.from({ length: monthStartOffset }, (_, index) => <div key={`offset-${index}`} className="h-20 rounded-2xl bg-transparent" />)}
 
-              {daysInMonth.map((day) => {
-                const isTripDay = day >= 12 && day <= 18;
-                const isSelected = selectedDate === day;
+              {Array.from({ length: daysInMonth }, (_, index) => {
+                const day = index + 1;
+                const date = `${monthKey}-${String(day).padStart(2, "0")}`;
+                const dayEvents = itineraryEvents.filter((event) => event.date === date);
+                const isTripDay = dayEvents.length > 0 || trips.some((trip) => date >= trip.startDate && date <= trip.endDate);
+                const isSelected = selectedDate === date;
 
                 return (
                   <button
                     key={day}
                     type="button"
-                    onClick={() => setSelectedDate(day)}
+                    onClick={() => setSelectedDate(date)}
                     className={`h-20 rounded-2xl p-2 text-left border transition-all duration-200 flex flex-col justify-between relative group ${
                       isSelected
                         ? "border-primary ring-2 ring-primary/40 bg-primary/10"
@@ -177,13 +166,7 @@ export default function CalendarTimelinePage() {
                     {isTripDay && (
                       <div className="truncate">
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-primary text-white block truncate">
-                          {day === 12
-                            ? "Paris Arrival"
-                            : day === 15
-                            ? "TGV → Nice"
-                            : day === 18
-                            ? "Departure"
-                            : "Paris Tour"}
+                            {dayEvents[0]?.title || trips.find((trip) => date >= trip.startDate && date <= trip.endDate)?.title || "Trip day"}
                         </span>
                       </div>
                     )}
@@ -203,17 +186,17 @@ export default function CalendarTimelinePage() {
                   Day Inspector
                 </span>
                 <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-                  September {selectedDate}, 2026
+                  {selectedDateLabel}
                 </h3>
               </div>
-              <Badge variant={selectedDate >= 12 && selectedDate <= 18 ? "default" : "outline"} className="text-xs">
-                {selectedDate >= 12 && selectedDate <= 18 ? "Trip Day" : "Free Day"}
+              <Badge variant={selectedTrip ? "default" : "outline"} className="text-xs">
+                {selectedTrip ? "Trip Day" : "Free Day"}
               </Badge>
             </div>
 
             {/* Hourly Agenda */}
             <div className="space-y-4">
-              {selectedDate >= 12 && selectedDate <= 18 ? (
+              {activeDayActivities.length > 0 ? (
                 activeDayActivities.map((act, idx) => (
                   <div
                     key={idx}
@@ -256,7 +239,7 @@ export default function CalendarTimelinePage() {
                 <div className="p-8 text-center rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800">
                   <CalendarIcon className="h-8 w-8 mx-auto text-zinc-400 mb-2" />
                   <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
-                    No scheduled travel events for September {selectedDate}
+                    No scheduled travel events for {selectedDateLabel}
                   </p>
                   <Link href="/trips/create">
                     <Button size="sm" variant="outline" className="rounded-xl text-xs mt-3">
